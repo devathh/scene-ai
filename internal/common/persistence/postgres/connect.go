@@ -3,7 +3,8 @@ package postgres
 import (
 	"fmt"
 
-	"github.com/devathh/scene-ai/internal/modules/auth/infrastructure/config"
+	"github.com/devathh/scene-ai/internal/common/config"
+	authuserpg "github.com/devathh/scene-ai/internal/modules/auth/infrastructure/persistence/postgres/user"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -37,7 +38,7 @@ func Connect(cfg *config.Config) (*gorm.DB, error) {
 }
 
 func Migrate(db *gorm.DB) error {
-	if err := db.AutoMigrate(); err != nil {
+	if err := db.AutoMigrate(&authuserpg.UserModel{}); err != nil {
 		return fmt.Errorf("failed to migrate postgres: %w", err)
 	}
 
