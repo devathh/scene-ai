@@ -4,13 +4,11 @@ app:
   env: ${APP_ENV}
 
 server:
-  http:
-    host: localhost
-    port: 8090
-    tls:
-      enable: false
-      server-cert-path: ./certs/server.crt
-      server-key-path: ./certs/server.key
+  addr: localhost:8090
+  tls:
+    enable: false
+    server-cert-path: ./certs/server.crt
+    server-key-path: ./certs/server.key
   read-timeout: 2s
   write-timeout: 2s
   idle-timeout: 30s
