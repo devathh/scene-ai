@@ -60,13 +60,13 @@ type Cache struct {
 }
 
 type RedisAuth struct {
-	Username string `yaml:"username" validate:"required"`
-	Password string `yaml:"password" validate:"required"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 type Redis struct {
 	Host string    `yaml:"host" validate:"required,hostname"`
 	Port int       `yaml:"port" validate:"required,number,min=1,max=65535"`
-	DB   int       `yaml:"db" validate:"required,gte=0"`
+	DB   int       `yaml:"db" validate:"gte=0"`
 	Auth RedisAuth `yaml:"auth" validate:"required"`
 }

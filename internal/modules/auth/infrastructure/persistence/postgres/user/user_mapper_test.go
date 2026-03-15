@@ -123,7 +123,6 @@ func TestToModel(t *testing.T) {
 			assert.Equal(t, tt.wantHash, result.PasswordHash)
 			assert.True(t, tt.wantCreated.Equal(result.CreatedAt))
 			assert.True(t, tt.wantUpdated.Equal(result.UpdatedAt))
-			assert.True(t, result.DeletedAt.IsZero())
 		})
 	}
 }

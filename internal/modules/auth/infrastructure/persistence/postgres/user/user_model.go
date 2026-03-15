@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type UserModel struct {
@@ -13,5 +14,5 @@ type UserModel struct {
 	PasswordHash string    `gorm:"not null"`
 	CreatedAt    time.Time `gorm:"not null"`
 	UpdatedAt    time.Time `gorm:"not null"`
-	DeletedAt    time.Time
+	DeletedAt    gorm.DeletedAt
 }
