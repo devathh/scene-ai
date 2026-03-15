@@ -1,0 +1,40 @@
+app:
+  name: scene-ai
+  version: 0.0.1
+  env: ${APP_ENV}
+
+server:
+  http:
+    host: localhost
+    port: 8090
+    tls:
+      enable: false
+      server-cert-path: ./certs/server.crt
+      server-key-path: ./certs/server.key
+  read-timeout: 2s
+  write-timeout: 2s
+  idle-timeout: 30s
+
+persistence:
+  postgres:
+    host: ${POSTGRES_HOST}
+    port: ${POSTGRES_PORT}
+    sslmode: disable
+    dbname: ${POSTGRES_DBNAME}
+    auth:
+      user: ${POSTGRES_USER}
+      password: ${POSTGRES_PASSWORD}
+    conn:
+      max-idles: 15
+      max-opens: 5
+      max-idle-time: 30m
+      max-lifetime: 15m
+
+cache:
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    db: 0
+    auth:
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
