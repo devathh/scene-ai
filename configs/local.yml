@@ -29,6 +29,8 @@ persistence:
       max-lifetime: 15m
 
 cache:
+  refresh-ttl: 168h
+  user-ttl: 15m
   redis:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}

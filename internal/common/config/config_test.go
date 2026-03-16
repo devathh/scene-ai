@@ -13,12 +13,11 @@ import (
 func TestNewLoader(t *testing.T) {
 	loader := NewLoader()
 
-	require.NotNil(t, loader, "Loader instance should not be nil")
-	require.NotNil(t, loader.validator, "Validator instance should be initialized")
+	require.NotNil(t, loader)
+	require.NotNil(t, loader.validator)
 }
 
 func TestLoader_Load_Success(t *testing.T) {
-	// Arrange
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "test_config.yml")
 
@@ -61,6 +60,8 @@ persistence:
       max-idle-time: 5m
       max-lifetime: 10m
 cache:
+  refresh-ttl: 10s
+  user-ttl: 30m
   redis:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
@@ -70,13 +71,13 @@ cache:
       password: ${REDIS_PASSWORD}
 `
 	err := os.WriteFile(configPath, []byte(content), 0644)
-	require.NoError(t, err, "Failed to create test config file")
+	require.NoError(t, err)
 
 	loader := NewLoader()
 
 	cfg, err := loader.Load(configPath)
 
-	require.NoError(t, err, "Load should succeed with valid config")
+	require.NoError(t, err)
 	require.NotNil(t, cfg)
 
 	assert.Equal(t, "test-app", cfg.App.Name)
@@ -87,6 +88,8 @@ cache:
 	assert.Equal(t, "localhost", cfg.Persistence.Postgres.Host)
 	assert.Equal(t, 5432, cfg.Persistence.Postgres.Port)
 
+	assert.Equal(t, 10*time.Second, cfg.Cache.RefreshTTL)
+	assert.Equal(t, 30*time.Minute, cfg.Cache.UserTTL)
 	assert.Equal(t, 6379, cfg.Cache.Redis.Port)
 	assert.Equal(t, 1, cfg.Cache.Redis.DB)
 }
@@ -96,8 +99,8 @@ func TestLoader_Load_FileNotFound(t *testing.T) {
 
 	_, err := loader.Load("/non/existent/path/config.yml")
 
-	require.Error(t, err, "Expected error for non-existent file")
-	assert.NotContains(t, err.Error(), "empty path to config file", "Error should be about file reading, not empty path")
+	require.Error(t, err)
+	assert.NotContains(t, err.Error(), "empty path to config file")
 }
 
 func TestLoader_Load_InvalidYaml(t *testing.T) {
@@ -114,7 +117,7 @@ func TestLoader_Load_InvalidYaml(t *testing.T) {
 
 	_, err = loader.Load(configPath)
 
-	require.Error(t, err, "Expected error for invalid YAML")
+	require.Error(t, err)
 }
 
 func TestLoader_Load_ValidationFailed(t *testing.T) {
@@ -123,6 +126,58 @@ func TestLoader_Load_ValidationFailed(t *testing.T) {
 	content := `app:
   name: test
   version: bad-version
+  env: local
+server:
+  addr: localhost:8080
+  tls:
+    enable: false
+    server-cert-path: ./cert.crt
+    server-key-path: ./key.key
+  read-timeout: 5s
+  write-timeout: 5s
+  idle-timeout: 1m
+persistence:
+  postgres:
+    host: localhost
+    port: 5432
+    sslmode: disable
+    dbname: testdb
+    auth:
+      user: user
+      password: pass
+    conn:
+      max-idles: 5
+      max-opens: 10
+      max-idle-time: 5m
+      max-lifetime: 10m
+cache:
+  refresh-ttl: 10s
+  user-ttl: 30m
+  redis:
+    host: localhost
+    port: 6379
+    db: 0
+    auth:
+      username: user
+      password: pass
+`
+	err := os.WriteFile(configPath, []byte(content), 0644)
+	require.NoError(t, err)
+
+	loader := NewLoader()
+
+	_, err = loader.Load(configPath)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "validation")
+}
+
+func TestLoader_Load_MissingCacheFields(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "missing_cache_fields.yml")
+	content := `app:
+  name: test
+  version: 1.0.0
   env: local
 server:
   addr: localhost:8080
@@ -163,8 +218,8 @@ cache:
 
 	_, err = loader.Load(configPath)
 
-	require.Error(t, err, "Expected validation error for invalid semver")
-	assert.Contains(t, err.Error(), "validation", "Error should mention validation")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "validation")
 }
 
 func TestLoader_Load_EmptyPath(t *testing.T) {
@@ -172,7 +227,7 @@ func TestLoader_Load_EmptyPath(t *testing.T) {
 
 	_, err := loader.Load("")
 
-	require.Error(t, err, "Expected error for empty path")
+	require.Error(t, err)
 	assert.Equal(t, "empty path to config file", err.Error())
 }
 
@@ -219,6 +274,8 @@ persistence:
       max-idle-time: 10m
       max-lifetime: 30m
 cache:
+  refresh-ttl: 15s
+  user-ttl: 1h
   redis:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
@@ -234,16 +291,18 @@ cache:
 	cfg, err := constructor.Init(configPath)
 	require.NoError(t, err)
 	assert.Equal(t, "prod-app", cfg.App.Name)
+	assert.Equal(t, 15*time.Second, cfg.Cache.RefreshTTL)
+	assert.Equal(t, 1*time.Hour, cfg.Cache.UserTTL)
 
 	t.Setenv("APP_CONFIG_PATH", configPath)
 	constructor2 := NewConstructor()
 	cfg2, err := constructor2.Init("")
-	require.NoError(t, err, "Initialization via ENV should succeed")
+	require.NoError(t, err)
 	assert.Equal(t, "prod", cfg2.App.Env)
 
 	t.Setenv("APP_CONFIG_PATH", "")
 
 	constructor3 := NewConstructor()
 	_, err = constructor3.Init("")
-	require.Error(t, err, "Expected error when no path is provided")
+	require.Error(t, err)
 }
