@@ -60,6 +60,7 @@ persistence:
       max-idle-time: 5m
       max-lifetime: 10m
 cache:
+  access-ttl: 1h
   refresh-ttl: 10s
   user-ttl: 30m
   redis:
@@ -88,6 +89,7 @@ cache:
 	assert.Equal(t, "localhost", cfg.Persistence.Postgres.Host)
 	assert.Equal(t, 5432, cfg.Persistence.Postgres.Port)
 
+	assert.Equal(t, 1*time.Hour, cfg.Cache.AccessTTL)
 	assert.Equal(t, 10*time.Second, cfg.Cache.RefreshTTL)
 	assert.Equal(t, 30*time.Minute, cfg.Cache.UserTTL)
 	assert.Equal(t, 6379, cfg.Cache.Redis.Port)
@@ -151,6 +153,7 @@ persistence:
       max-idle-time: 5m
       max-lifetime: 10m
 cache:
+  access-ttl: 1h
   refresh-ttl: 10s
   user-ttl: 30m
   redis:
@@ -245,6 +248,8 @@ func TestConstructor_Init(t *testing.T) {
 	t.Setenv("REDIS_PORT", "6379")
 	t.Setenv("REDIS_USERNAME", "admin")
 	t.Setenv("REDIS_PASSWORD", "secret")
+	// Очищаем переменную окружения APP_CONFIG_PATH, чтобы тест использовал defaultPath
+	t.Setenv("APP_CONFIG_PATH", "")
 
 	content := `app:
   name: prod-app
@@ -274,6 +279,7 @@ persistence:
       max-idle-time: 10m
       max-lifetime: 30m
 cache:
+  access-ttl: 24h
   refresh-ttl: 15s
   user-ttl: 1h
   redis:
@@ -291,17 +297,19 @@ cache:
 	cfg, err := constructor.Init(configPath)
 	require.NoError(t, err)
 	assert.Equal(t, "prod-app", cfg.App.Name)
+	assert.Equal(t, 24*time.Hour, cfg.Cache.AccessTTL)
 	assert.Equal(t, 15*time.Second, cfg.Cache.RefreshTTL)
 	assert.Equal(t, 1*time.Hour, cfg.Cache.UserTTL)
 
+	// Тест с использованием переменной окружения APP_CONFIG_PATH
 	t.Setenv("APP_CONFIG_PATH", configPath)
 	constructor2 := NewConstructor()
-	cfg2, err := constructor2.Init("")
+	cfg2, err := constructor2.Init("") // Передаем пустой путь, должен взять из env
 	require.NoError(t, err)
 	assert.Equal(t, "prod", cfg2.App.Env)
 
+	// Тест с отсутствием пути (и в env, и в аргументе)
 	t.Setenv("APP_CONFIG_PATH", "")
-
 	constructor3 := NewConstructor()
 	_, err = constructor3.Init("")
 	require.Error(t, err)

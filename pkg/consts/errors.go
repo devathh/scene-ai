@@ -11,4 +11,8 @@ var (
 	ErrSessionNotFound = errors.New("session not found")
 
 	ErrInvalidToken = errors.New("invalid token")
+
+	ErrInternalServer   = errors.New("internal server error")
+	ErrInvalidIP        = errors.New("invalid ip")
+	ErrInvalidUserAgent = errors.New("invalid user-agent")
 )
