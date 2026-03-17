@@ -29,6 +29,7 @@ persistence:
       max-lifetime: 15m
 
 cache:
+  access-ttl: 24h
   refresh-ttl: 168h
   user-ttl: 15m
   redis:

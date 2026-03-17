@@ -56,6 +56,7 @@ type Postgres struct {
 }
 
 type Cache struct {
+	AccessTTL  time.Duration `yaml:"access-ttl" validate:"required,min=1s"`
 	RefreshTTL time.Duration `yaml:"refresh-ttl" validate:"required,min=1s"`
 	UserTTL    time.Duration `yaml:"user-ttl" validate:"required,min=1s"`
 	Redis      Redis         `yaml:"redis" validate:"required"`
