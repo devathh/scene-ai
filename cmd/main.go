@@ -2,41 +2,39 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log/slog"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/devathh/scene-ai/internal/common/config"
-	"github.com/devathh/scene-ai/internal/common/persistence/postgres"
-	authuserpg "github.com/devathh/scene-ai/internal/modules/auth/infrastructure/persistence/postgres/user"
-	"github.com/google/uuid"
-	"github.com/joho/godotenv"
+	"github.com/devathh/scene-ai/internal/app"
 )
 
 func main() {
-	if err := godotenv.Load(".env"); err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
-	}
-
-	constr := config.NewConstructor()
-	cfg, err := constr.Init(os.Getenv("APP_CONFIG_PATH"))
+	app, cleanup, err := app.New()
 	if err != nil {
-		slog.Error(err.Error())
+		slog.Error("failed to setup app", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+	defer cleanup()
 
-	db, err := postgres.Connect(cfg)
-	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
+	go func() {
+		if err := app.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			slog.Error("failed to start server", slog.String("error", err.Error()))
+		}
+	}()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+	<-stop
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	defer cancel()
+
+	if err := app.Shutdown(ctx); err != nil {
+		slog.Error("failed to shutdown server", slog.String("error", err.Error()))
 	}
-
-	if err := postgres.Migrate(db); err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
-	}
-
-	ur := authuserpg.New(db)
-	fmt.Println(ur.Delete(context.Background(), uuid.MustParse("ad237575-7fb0-4025-a89d-8d46e015529f")))
 }

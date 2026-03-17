@@ -33,11 +33,11 @@ func (sr *SessionRepository) Set(ctx context.Context, session *session.Session, 
 	}
 
 	pipe := sr.client.TxPipeline()
-	pipe.Set(ctx, sr.getRefreshKey(refresh), bytes, sr.cfg.Cache.RefreshTTL)
+	pipe.Set(ctx, sr.getRefreshKey(refresh), bytes, sr.cfg.JWT.RefreshTTL)
 
 	key := sr.getSessionsKey(session.UserID)
 	pipe.SAdd(ctx, key, refresh)
-	pipe.Expire(ctx, key, sr.cfg.Cache.RefreshTTL)
+	pipe.Expire(ctx, key, sr.cfg.JWT.RefreshTTL)
 
 	if _, err := pipe.Exec(ctx); err != nil {
 		if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {

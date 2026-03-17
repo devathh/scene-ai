@@ -60,8 +60,6 @@ persistence:
       max-idle-time: 5m
       max-lifetime: 10m
 cache:
-  access-ttl: 1h
-  refresh-ttl: 10s
   user-ttl: 30m
   redis:
     host: ${REDIS_HOST}
@@ -70,6 +68,11 @@ cache:
     auth:
       username: ${REDIS_USERNAME}
       password: ${REDIS_PASSWORD}
+jwt:
+  access-ttl: 24h
+  refresh-ttl: 168h
+  private-key-path: ./jwtRS256.key
+  public-key-path: ./jwtRS256.key.pub
 `
 	err := os.WriteFile(configPath, []byte(content), 0644)
 	require.NoError(t, err)
@@ -89,11 +92,14 @@ cache:
 	assert.Equal(t, "localhost", cfg.Persistence.Postgres.Host)
 	assert.Equal(t, 5432, cfg.Persistence.Postgres.Port)
 
-	assert.Equal(t, 1*time.Hour, cfg.Cache.AccessTTL)
-	assert.Equal(t, 10*time.Second, cfg.Cache.RefreshTTL)
 	assert.Equal(t, 30*time.Minute, cfg.Cache.UserTTL)
 	assert.Equal(t, 6379, cfg.Cache.Redis.Port)
 	assert.Equal(t, 1, cfg.Cache.Redis.DB)
+
+	assert.Equal(t, 24*time.Hour, cfg.JWT.AccessTTL)
+	assert.Equal(t, 168*time.Hour, cfg.JWT.RefreshTTL)
+	assert.Equal(t, "./jwtRS256.key", cfg.JWT.PrivateKeyPath)
+	assert.Equal(t, "./jwtRS256.key.pub", cfg.JWT.PublicKeyPath)
 }
 
 func TestLoader_Load_FileNotFound(t *testing.T) {
@@ -153,8 +159,6 @@ persistence:
       max-idle-time: 5m
       max-lifetime: 10m
 cache:
-  access-ttl: 1h
-  refresh-ttl: 10s
   user-ttl: 30m
   redis:
     host: localhost
@@ -163,6 +167,11 @@ cache:
     auth:
       username: user
       password: pass
+jwt:
+  access-ttl: 24h
+  refresh-ttl: 168h
+  private-key-path: ./jwtRS256.key
+  public-key-path: ./jwtRS256.key.pub
 `
 	err := os.WriteFile(configPath, []byte(content), 0644)
 	require.NoError(t, err)
@@ -213,6 +222,11 @@ cache:
     auth:
       username: user
       password: pass
+jwt:
+  access-ttl: 24h
+  refresh-ttl: 168h
+  private-key-path: ./jwtRS256.key
+  public-key-path: ./jwtRS256.key.pub
 `
 	err := os.WriteFile(configPath, []byte(content), 0644)
 	require.NoError(t, err)
@@ -279,8 +293,6 @@ persistence:
       max-idle-time: 10m
       max-lifetime: 30m
 cache:
-  access-ttl: 24h
-  refresh-ttl: 15s
   user-ttl: 1h
   redis:
     host: ${REDIS_HOST}
@@ -289,6 +301,11 @@ cache:
     auth:
       username: ${REDIS_USERNAME}
       password: ${REDIS_PASSWORD}
+jwt:
+  access-ttl: 24h
+  refresh-ttl: 168h
+  private-key-path: ./jwtRS256.key
+  public-key-path: ./jwtRS256.key.pub
 `
 	err := os.WriteFile(configPath, []byte(content), 0644)
 	require.NoError(t, err)
@@ -297,9 +314,8 @@ cache:
 	cfg, err := constructor.Init(configPath)
 	require.NoError(t, err)
 	assert.Equal(t, "prod-app", cfg.App.Name)
-	assert.Equal(t, 24*time.Hour, cfg.Cache.AccessTTL)
-	assert.Equal(t, 15*time.Second, cfg.Cache.RefreshTTL)
 	assert.Equal(t, 1*time.Hour, cfg.Cache.UserTTL)
+	assert.Equal(t, 24*time.Hour, cfg.JWT.AccessTTL)
 
 	// Тест с использованием переменной окружения APP_CONFIG_PATH
 	t.Setenv("APP_CONFIG_PATH", configPath)

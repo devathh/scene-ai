@@ -44,7 +44,7 @@ func (jm *JWTManager) GenerateAccess(userID uuid.UUID) (string, error) {
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "scene-ai",
 			Subject:   "scene-user",
-			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(jm.cfg.Cache.AccessTTL)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(jm.cfg.JWT.AccessTTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		},
 	}

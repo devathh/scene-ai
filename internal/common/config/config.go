@@ -8,6 +8,7 @@ type Config struct {
 	Server      Server      `yaml:"server" validate:"required"`
 	Persistence Persistence `yaml:"persistence" validate:"required"`
 	Cache       Cache       `yaml:"cache" validate:"required"`
+	JWT         JWTConfig   `yaml:"jwt" validate:"required"`
 }
 
 type App struct {
@@ -56,10 +57,8 @@ type Postgres struct {
 }
 
 type Cache struct {
-	AccessTTL  time.Duration `yaml:"access-ttl" validate:"required,min=1s"`
-	RefreshTTL time.Duration `yaml:"refresh-ttl" validate:"required,min=1s"`
-	UserTTL    time.Duration `yaml:"user-ttl" validate:"required,min=1s"`
-	Redis      Redis         `yaml:"redis" validate:"required"`
+	UserTTL time.Duration `yaml:"user-ttl" validate:"required,min=1s"`
+	Redis   Redis         `yaml:"redis" validate:"required"`
 }
 
 type RedisAuth struct {
@@ -72,4 +71,11 @@ type Redis struct {
 	Port int       `yaml:"port" validate:"required,number,min=1,max=65535"`
 	DB   int       `yaml:"db" validate:"gte=0"`
 	Auth RedisAuth `yaml:"auth" validate:"required"`
+}
+
+type JWTConfig struct {
+	AccessTTL      time.Duration `yaml:"access-ttl" validate:"required,min=1s"`
+	RefreshTTL     time.Duration `yaml:"refresh-ttl" validate:"required,min=1s"`
+	PrivateKeyPath string        `yaml:"private-key-path" validate:"required"`
+	PublicKeyPath  string        `yaml:"public-key-path" validate:"required"`
 }

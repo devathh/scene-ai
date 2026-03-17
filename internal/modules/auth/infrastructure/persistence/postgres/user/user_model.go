@@ -9,6 +9,7 @@ import (
 
 type UserModel struct {
 	ID           uuid.UUID `gorm:"primarykey"`
+	Email        string    `gorm:"uniqueIndex;not null"`
 	Firstname    string    `gorm:"not null"`
 	Lastname     string
 	PasswordHash string    `gorm:"not null"`

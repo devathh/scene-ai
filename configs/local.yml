@@ -29,8 +29,6 @@ persistence:
       max-lifetime: 15m
 
 cache:
-  access-ttl: 24h
-  refresh-ttl: 168h
   user-ttl: 15m
   redis:
     host: ${REDIS_HOST}
@@ -39,3 +37,9 @@ cache:
     auth:
       username: ${REDIS_USERNAME}
       password: ${REDIS_PASSWORD}
+
+jwt:
+  access-ttl: 24h
+  refresh-ttl: 168h
+  private-key-path: ./jwtRS256.key
+  public-key-path: ./jwtRS256.key.pub
