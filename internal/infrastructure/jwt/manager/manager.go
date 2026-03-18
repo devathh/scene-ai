@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/devathh/scene-ai/internal/common/claims"
 	"github.com/devathh/scene-ai/internal/common/config"
 	jwtdomain "github.com/devathh/scene-ai/internal/modules/auth/domain/jwt"
 	"github.com/devathh/scene-ai/pkg/consts"
@@ -39,7 +40,7 @@ func New(cfg *config.Config, loader jwtdomain.KeyLoader) (*JWTManager, error) {
 }
 
 func (jm *JWTManager) GenerateAccess(userID uuid.UUID) (string, error) {
-	claims := jwtdomain.Claims{
+	claims := claims.Claims{
 		UserID: userID.String(),
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "scene-ai",
@@ -68,8 +69,8 @@ func (jm *JWTManager) GenerateRefresh() (string, error) {
 	return hex.EncodeToString(buf), nil
 }
 
-func (jm *JWTManager) Validate(tokenString string) (*jwtdomain.Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &jwtdomain.Claims{}, func(t *jwt.Token) (any, error) {
+func (jm *JWTManager) Validate(tokenString string) (*claims.Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &claims.Claims{}, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, consts.ErrInvalidToken
 		}
@@ -80,7 +81,7 @@ func (jm *JWTManager) Validate(tokenString string) (*jwtdomain.Claims, error) {
 		return nil, consts.ErrInvalidToken
 	}
 
-	if claims, ok := token.Claims.(*jwtdomain.Claims); ok {
+	if claims, ok := token.Claims.(*claims.Claims); ok {
 		return claims, nil
 	}
 

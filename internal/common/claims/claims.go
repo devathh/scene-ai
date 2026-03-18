@@ -1,4 +1,4 @@
-package jwtdomain
+package claims
 
 import "github.com/golang-jwt/jwt/v5"
 
