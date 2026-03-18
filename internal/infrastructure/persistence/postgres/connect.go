@@ -40,8 +40,8 @@ func Connect(cfg *config.Config) (*gorm.DB, error) {
 
 func Migrate(db *gorm.DB) error {
 	if err := db.AutoMigrate(&authuserpg.UserModel{},
-		&scenariopg.SceneModel{},
 		&scenariopg.ScenarioModel{},
+		&scenariopg.SceneModel{},
 	); err != nil {
 		return fmt.Errorf("failed to migrate postgres: %w", err)
 	}

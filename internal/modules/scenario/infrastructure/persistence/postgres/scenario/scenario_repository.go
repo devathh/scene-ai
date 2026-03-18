@@ -113,10 +113,15 @@ func (sr *ScenarioRepository) GetList(ctx context.Context, userID, beforeID uuid
 	}
 
 	var models []ScenarioModel
-	if err := sr.db.WithContext(ctx).
-		Where("author_id = ? AND id > ?", userID, beforeID).
-		Find(&models).
-		Error; err != nil {
+	query := sr.db.WithContext(ctx).
+		Order("id DESC").
+		Where("author_id = ?", userID)
+
+	if beforeID != uuid.Nil {
+		query = query.Where("id > ?", beforeID)
+	}
+
+	if err := query.Find(&models).Error; err != nil {
 		if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
 			return nil, err
 		}

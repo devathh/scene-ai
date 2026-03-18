@@ -3,17 +3,20 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/devathh/scene-ai/internal/common/dtos"
 	authservices "github.com/devathh/scene-ai/internal/modules/auth/application/services"
+	scenarioservices "github.com/devathh/scene-ai/internal/modules/scenario/application/services"
 	"github.com/devathh/scene-ai/pkg/consts"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type Routes struct {
-	authService authservices.AuthService
+	authService     authservices.AuthService
+	scenarioService scenarioservices.ScenarioService
 }
 
 func (r *Routes) Register() gin.HandlerFunc {
@@ -129,7 +132,7 @@ func (r *Routes) GetUser() gin.HandlerFunc {
 	}
 }
 
-func (r *Routes) Delete() gin.HandlerFunc {
+func (r *Routes) DeleteUser() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token, err := r.getToken(ctx)
 		if err != nil {
@@ -153,6 +156,201 @@ func (r *Routes) Delete() gin.HandlerFunc {
 		}
 
 		ctx.JSON(http.StatusNoContent, nil)
+	}
+}
+
+func (r *Routes) CreateScenario() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var req dtos.CreateScenarioRequest
+		if err := ctx.BindJSON(&req); err != nil {
+			ctx.JSON(http.StatusBadRequest, dtos.ErrMsg{
+				Error: "invalid request",
+			})
+			return
+		}
+
+		token, err := r.getToken(ctx)
+		if err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		resp, err := r.scenarioService.Create(ctx, &req, token)
+		if err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		ctx.JSON(http.StatusCreated, resp)
+	}
+}
+
+func (r *Routes) UpdateScenario() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id, err := uuid.Parse(ctx.Param("id"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, dtos.ErrMsg{
+				Error: "invalid id",
+			})
+			return
+		}
+
+		var req dtos.UpdateScenarioRequest
+		if err := ctx.BindJSON(&req); err != nil {
+			ctx.JSON(http.StatusBadRequest, dtos.ErrMsg{
+				Error: "invalid request",
+			})
+			return
+		}
+
+		token, err := r.getToken(ctx)
+		if err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		resp, err := r.scenarioService.Update(ctx, id, &req, token)
+		if err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		ctx.JSON(http.StatusOK, resp)
+	}
+}
+
+func (r *Routes) DeleteScenario() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id, err := uuid.Parse(ctx.Param("id"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, dtos.ErrMsg{
+				Error: "invalid id",
+			})
+			return
+		}
+
+		token, err := r.getToken(ctx)
+		if err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		if err := r.scenarioService.Delete(ctx, id, token); err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		ctx.JSON(http.StatusNoContent, nil)
+	}
+}
+
+func (r *Routes) GetScenarioByID() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id, err := uuid.Parse(ctx.Param("id"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, dtos.ErrMsg{
+				Error: "invalid id",
+			})
+			return
+		}
+
+		resp, err := r.scenarioService.GetByID(ctx, id)
+		if err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		ctx.JSON(http.StatusOK, resp)
+	}
+}
+
+func (r *Routes) GetScenarios() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token, err := r.getToken(ctx)
+		if err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		beforeID := uuid.Nil
+		if raw := ctx.Query("before-id"); raw != "" {
+			id, err := uuid.Parse(raw)
+			if err != nil {
+				ctx.JSON(
+					http.StatusBadRequest,
+					dtos.ErrMsg{
+						Error: "invalid before id",
+					},
+				)
+				return
+			}
+
+			beforeID = id
+		}
+
+		limit, err := strconv.Atoi(ctx.Query("limit"))
+		if err != nil {
+			ctx.JSON(
+				http.StatusBadRequest,
+				dtos.ErrMsg{
+					Error: "invalid limit",
+				},
+			)
+			return
+		}
+
+		resp, err := r.scenarioService.GetList(ctx, beforeID, limit, token)
+		if err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		ctx.JSON(http.StatusOK, resp)
 	}
 }
 
@@ -191,7 +389,8 @@ func (r *Routes) getCode(err error) int {
 		errors.Is(err, consts.ErrInvalidUserID):
 		return http.StatusBadRequest
 	case errors.Is(err, consts.ErrUserNotFound),
-		errors.Is(err, consts.ErrSessionNotFound):
+		errors.Is(err, consts.ErrSessionNotFound),
+		errors.Is(err, consts.ErrScenarioNotFound):
 		return http.StatusNotFound
 	case errors.Is(err, consts.ErrInvalidToken):
 		return http.StatusUnauthorized
@@ -202,6 +401,15 @@ func (r *Routes) getCode(err error) int {
 		return http.StatusConflict
 	case errors.Is(err, consts.ErrInvalidCredentials):
 		return http.StatusUnauthorized
+	case errors.Is(err, consts.ErrEmptyTitle),
+		errors.Is(err, consts.ErrEmptyScenarioPrompt),
+		errors.Is(err, consts.ErrEmptyGlobalStylePrompt),
+		errors.Is(err, consts.ErrEmptyVideoPrompt),
+		errors.Is(err, consts.ErrNoScenes),
+		errors.Is(err, consts.ErrInvalidLimit):
+		return http.StatusBadRequest
+	case errors.Is(err, consts.ErrForbidden):
+		return http.StatusForbidden
 	}
 
 	return http.StatusInternalServerError

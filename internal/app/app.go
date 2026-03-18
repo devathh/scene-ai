@@ -16,6 +16,8 @@ import (
 	authservices "github.com/devathh/scene-ai/internal/modules/auth/application/services"
 	sessionredis "github.com/devathh/scene-ai/internal/modules/auth/infrastructure/cache/redis/session"
 	authuserpg "github.com/devathh/scene-ai/internal/modules/auth/infrastructure/persistence/postgres/user"
+	scenarioservices "github.com/devathh/scene-ai/internal/modules/scenario/application/services"
+	scenariopg "github.com/devathh/scene-ai/internal/modules/scenario/infrastructure/persistence/postgres/scenario"
 	"github.com/devathh/scene-ai/pkg/log"
 	"github.com/joho/godotenv"
 	redissdk "github.com/redis/go-redis/v9"
@@ -103,12 +105,44 @@ func provideServer(
 		return nil, fmt.Errorf("failed to provide auth-service: %w", err)
 	}
 
-	handler, err := handlers.New(cfg, authService)
+	scenarioService, err := provideScenarioService(
+		log,
+		cfg,
+		db,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to provide scenario service: %w", err)
+	}
+
+	handler, err := handlers.New(cfg,
+		authService,
+		scenarioService)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create handler: %w", err)
 	}
 
 	return httpserver.New(cfg, handler), nil
+}
+
+func provideScenarioService(
+	log *slog.Logger,
+	cfg *config.Config,
+	db *gorm.DB,
+) (scenarioservices.ScenarioService, error) {
+	jwtManager, err := jwtmanager.New(cfg, jwtkeyloader.New(
+		cfg.JWT.PublicKeyPath,
+		cfg.JWT.PrivateKeyPath,
+	))
+	if err != nil {
+		return nil, err
+	}
+
+	return scenarioservices.New(
+		cfg,
+		log,
+		scenariopg.New(db),
+		jwtManager,
+	), nil
 }
 
 func provideAuthService(

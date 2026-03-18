@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"sort"
 	"time"
 
 	"github.com/devathh/scene-ai/internal/common/config"
@@ -317,6 +318,10 @@ func (s *scenarioService) toDTO(scen *scenario.Scenario) *dtos.Scenario {
 		CreatedAt:         scen.CreatedAt().UnixMilli(),
 		UpdatedAt:         scen.UpdatedAt().UnixMilli(),
 	}
+
+	sort.Slice(scen.Scenes(), func(i, j int) bool {
+		return scen.Scenes()[i].Order() < scen.Scenes()[j].Order()
+	})
 	for idx, scene := range scen.Scenes() {
 		response.Scenes[idx] = dtos.Scene{
 			ID:          scene.ID().String(),
@@ -335,7 +340,7 @@ func (s *scenarioService) getUserIDFromToken(token string) (uuid.UUID, error) {
 		return uuid.Nil, err
 	}
 
-	userID, err := uuid.Parse(claims.ID)
+	userID, err := uuid.Parse(claims.UserID)
 	if err != nil {
 		return uuid.Nil, consts.ErrInvalidToken
 	}
