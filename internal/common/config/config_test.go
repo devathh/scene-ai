@@ -31,6 +31,7 @@ func TestLoader_Load_Success(t *testing.T) {
 	t.Setenv("REDIS_PORT", "6379")
 	t.Setenv("REDIS_USERNAME", "redis_user")
 	t.Setenv("REDIS_PASSWORD", "redis_pass")
+	t.Setenv("OR_APIKEY", "sk-test-key")
 
 	content := `app:
   name: test-app
@@ -61,6 +62,7 @@ persistence:
       max-lifetime: 10m
 cache:
   user-ttl: 30m
+  scenario-generation-ttl: 45m
   redis:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
@@ -73,6 +75,10 @@ jwt:
   refresh-ttl: 168h
   private-key-path: ./jwtRS256.key
   public-key-path: ./jwtRS256.key.pub
+openrouter:
+  api-key: ${OR_APIKEY}
+  scenario-prompt-path: ./SCENARIO_PROMPT.md
+  scene-prompt-path: ./SCENE_PROMPT.md
 `
 	err := os.WriteFile(configPath, []byte(content), 0644)
 	require.NoError(t, err)
@@ -93,6 +99,7 @@ jwt:
 	assert.Equal(t, 5432, cfg.Persistence.Postgres.Port)
 
 	assert.Equal(t, 30*time.Minute, cfg.Cache.UserTTL)
+	assert.Equal(t, 45*time.Minute, cfg.Cache.ScenarioGenerationTTL)
 	assert.Equal(t, 6379, cfg.Cache.Redis.Port)
 	assert.Equal(t, 1, cfg.Cache.Redis.DB)
 
@@ -100,6 +107,10 @@ jwt:
 	assert.Equal(t, 168*time.Hour, cfg.JWT.RefreshTTL)
 	assert.Equal(t, "./jwtRS256.key", cfg.JWT.PrivateKeyPath)
 	assert.Equal(t, "./jwtRS256.key.pub", cfg.JWT.PublicKeyPath)
+
+	assert.Equal(t, "sk-test-key", cfg.OpenRouter.APIKey)
+	assert.Equal(t, "./SCENARIO_PROMPT.md", cfg.OpenRouter.ScenarioPromptPath)
+	assert.Equal(t, "./SCENE_PROMPT.md", cfg.OpenRouter.ScenePromptPath)
 }
 
 func TestLoader_Load_FileNotFound(t *testing.T) {
@@ -160,6 +171,7 @@ persistence:
       max-lifetime: 10m
 cache:
   user-ttl: 30m
+  scenario-generation-ttl: 45m
   redis:
     host: localhost
     port: 6379
@@ -172,6 +184,10 @@ jwt:
   refresh-ttl: 168h
   private-key-path: ./jwtRS256.key
   public-key-path: ./jwtRS256.key.pub
+openrouter:
+  api-key: key
+  scenario-prompt-path: ./prompt.md
+  scene-prompt-path: ./scene.md
 `
 	err := os.WriteFile(configPath, []byte(content), 0644)
 	require.NoError(t, err)
@@ -227,6 +243,10 @@ jwt:
   refresh-ttl: 168h
   private-key-path: ./jwtRS256.key
   public-key-path: ./jwtRS256.key.pub
+openrouter:
+  api-key: key
+  scenario-prompt-path: ./prompt.md
+  scene-prompt-path: ./scene.md
 `
 	err := os.WriteFile(configPath, []byte(content), 0644)
 	require.NoError(t, err)
@@ -262,7 +282,7 @@ func TestConstructor_Init(t *testing.T) {
 	t.Setenv("REDIS_PORT", "6379")
 	t.Setenv("REDIS_USERNAME", "admin")
 	t.Setenv("REDIS_PASSWORD", "secret")
-	// Очищаем переменную окружения APP_CONFIG_PATH, чтобы тест использовал defaultPath
+	t.Setenv("OR_APIKEY", "sk-prod-key")
 	t.Setenv("APP_CONFIG_PATH", "")
 
 	content := `app:
@@ -294,6 +314,7 @@ persistence:
       max-lifetime: 30m
 cache:
   user-ttl: 1h
+  scenario-generation-ttl: 2h
   redis:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
@@ -306,6 +327,10 @@ jwt:
   refresh-ttl: 168h
   private-key-path: ./jwtRS256.key
   public-key-path: ./jwtRS256.key.pub
+openrouter:
+  api-key: ${OR_APIKEY}
+  scenario-prompt-path: ./SCENARIO_PROMPT.md
+  scene-prompt-path: ./SCENE_PROMPT.md
 `
 	err := os.WriteFile(configPath, []byte(content), 0644)
 	require.NoError(t, err)
@@ -315,16 +340,16 @@ jwt:
 	require.NoError(t, err)
 	assert.Equal(t, "prod-app", cfg.App.Name)
 	assert.Equal(t, 1*time.Hour, cfg.Cache.UserTTL)
+	assert.Equal(t, 2*time.Hour, cfg.Cache.ScenarioGenerationTTL)
 	assert.Equal(t, 24*time.Hour, cfg.JWT.AccessTTL)
+	assert.Equal(t, "sk-prod-key", cfg.OpenRouter.APIKey)
 
-	// Тест с использованием переменной окружения APP_CONFIG_PATH
 	t.Setenv("APP_CONFIG_PATH", configPath)
 	constructor2 := NewConstructor()
-	cfg2, err := constructor2.Init("") // Передаем пустой путь, должен взять из env
+	cfg2, err := constructor2.Init("")
 	require.NoError(t, err)
 	assert.Equal(t, "prod", cfg2.App.Env)
 
-	// Тест с отсутствием пути (и в env, и в аргументе)
 	t.Setenv("APP_CONFIG_PATH", "")
 	constructor3 := NewConstructor()
 	_, err = constructor3.Init("")

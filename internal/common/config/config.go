@@ -2,13 +2,13 @@ package config
 
 import "time"
 
-// Config represents the main structure of global config
 type Config struct {
 	App         App         `yaml:"app" validate:"required"`
 	Server      Server      `yaml:"server" validate:"required"`
 	Persistence Persistence `yaml:"persistence" validate:"required"`
 	Cache       Cache       `yaml:"cache" validate:"required"`
 	JWT         JWTConfig   `yaml:"jwt" validate:"required"`
+	OpenRouter  OpenRouter  `yaml:"openrouter" validate:"required"`
 }
 
 type App struct {
@@ -57,8 +57,9 @@ type Postgres struct {
 }
 
 type Cache struct {
-	UserTTL time.Duration `yaml:"user-ttl" validate:"required,min=1s"`
-	Redis   Redis         `yaml:"redis" validate:"required"`
+	UserTTL               time.Duration `yaml:"user-ttl" validate:"required,min=1s"`
+	ScenarioGenerationTTL time.Duration `yaml:"scenario-generation-ttl" validate:"required,min=1s"`
+	Redis                 Redis         `yaml:"redis" validate:"required"`
 }
 
 type RedisAuth struct {
@@ -78,4 +79,10 @@ type JWTConfig struct {
 	RefreshTTL     time.Duration `yaml:"refresh-ttl" validate:"required,min=1s"`
 	PrivateKeyPath string        `yaml:"private-key-path" validate:"required"`
 	PublicKeyPath  string        `yaml:"public-key-path" validate:"required"`
+}
+
+type OpenRouter struct {
+	APIKey             string `yaml:"api-key" validate:"required"`
+	ScenarioPromptPath string `yaml:"scenario-prompt-path" validate:"required,file"`
+	ScenePromptPath    string `yaml:"scene-prompt-path" validate:"required,file"`
 }
