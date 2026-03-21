@@ -10,6 +10,8 @@ import (
 	authservices "github.com/devathh/scene-ai/internal/modules/auth/application/services"
 	scenarioservices "github.com/devathh/scene-ai/internal/modules/scenario/application/services"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var ErrInvalidEnvironment = errors.New("invalid global environment")
@@ -32,6 +34,8 @@ func New(
 	}
 
 	router.Use(middlewares.BaseMiddleware)
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	routes := Routes{
 		authService:     authService,

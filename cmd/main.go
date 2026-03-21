@@ -11,10 +11,30 @@ import (
 	"time"
 
 	"github.com/devathh/scene-ai/internal/app"
+	_ "github.com/devathh/scene-ai/docs"
 )
 
+// @title Scene AI API
+// @version 1.0
+// @description API for generating scenarios and scenes using Artificial Intelligence.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.email support@scene-ai.com
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:8080
+// @BasePath /api/v1
+// @schemes http https
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 func main() {
-	app, cleanup, err := app.New()
+	appInstance, cleanup, err := app.New()
 	if err != nil {
 		slog.Error("failed to setup app", slog.String("error", err.Error()))
 		os.Exit(1)
@@ -22,7 +42,7 @@ func main() {
 	defer cleanup()
 
 	go func() {
-		if err := app.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := appInstance.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("failed to start server", slog.String("error", err.Error()))
 		}
 	}()
@@ -34,7 +54,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
 
-	if err := app.Shutdown(ctx); err != nil {
+	if err := appInstance.Shutdown(ctx); err != nil {
 		slog.Error("failed to shutdown server", slog.String("error", err.Error()))
 	}
 }

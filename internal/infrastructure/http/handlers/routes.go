@@ -22,6 +22,17 @@ type Routes struct {
 	aiService       aiservices.AIService
 }
 
+// Register godoc
+// @Summary Register a new user
+// @Description Create a new user account with email and password.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body dtos.RegisterRequest true "Registration details"
+// @Success 201 {object} dtos.User "User created successfully"
+// @Failure 400 {object} dtos.ErrMsg "Invalid request"
+// @Failure 409 {object} dtos.ErrMsg "User already exists"
+// @Router /api/v1/auth/register [post]
 func (r *Routes) Register() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req dtos.RegisterRequest
@@ -47,6 +58,16 @@ func (r *Routes) Register() gin.HandlerFunc {
 	}
 }
 
+// Login godoc
+// @Summary User login
+// @Description Authenticate user and return access token.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body dtos.LoginRequest true "Login credentials"
+// @Success 200 {object} dtos.Token "Login successful"
+// @Failure 401 {object} dtos.ErrMsg "Invalid credentials"
+// @Router /api/v1/auth/login [post]
 func (r *Routes) Login() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req dtos.LoginRequest
@@ -72,6 +93,18 @@ func (r *Routes) Login() gin.HandlerFunc {
 	}
 }
 
+// UpdateUser godoc
+// @Summary Update user profile
+// @Description Update current user's information.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body dtos.UpdateUserRequest true "Update details"
+// @Success 200 {object} dtos.User "Updated user"
+// @Failure 400 {object} dtos.ErrMsg "Invalid request"
+// @Failure 401 {object} dtos.ErrMsg "Unauthorized"
+// @Router /api/v1/auth/user [patch]
 func (r *Routes) UpdateUser() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token, err := r.getToken(ctx)
@@ -108,6 +141,17 @@ func (r *Routes) UpdateUser() gin.HandlerFunc {
 	}
 }
 
+// GetUser godoc
+// @Summary Get user details
+// @Description Retrieve user profile by ID or current token.
+// @Tags Auth
+// @Produce json
+// @Security BearerAuth
+// @Param id query string false "User ID (optional, defaults to token owner)"
+// @Success 200 {object} dtos.User "User details"
+// @Failure 400 {object} dtos.ErrMsg "Invalid ID"
+// @Failure 404 {object} dtos.ErrMsg "User not found"
+// @Router /api/v1/auth/user [get]
 func (r *Routes) GetUser() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var (
@@ -135,6 +179,14 @@ func (r *Routes) GetUser() gin.HandlerFunc {
 	}
 }
 
+// DeleteUser godoc
+// @Summary Delete user account
+// @Description Permanently delete the current user's account.
+// @Tags Auth
+// @Security BearerAuth
+// @Success 204 "No content"
+// @Failure 401 {object} dtos.ErrMsg "Unauthorized"
+// @Router /api/v1/auth/user [delete]
 func (r *Routes) DeleteUser() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token, err := r.getToken(ctx)
@@ -162,6 +214,18 @@ func (r *Routes) DeleteUser() gin.HandlerFunc {
 	}
 }
 
+// CreateScenario godoc
+// @Summary Create a new scenario
+// @Description Create a manual scenario with scenes.
+// @Tags Scenario
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body dtos.CreateScenarioRequest true "Scenario details"
+// @Success 201 {object} dtos.Scenario "Scenario created"
+// @Failure 400 {object} dtos.ErrMsg "Invalid request"
+// @Failure 401 {object} dtos.ErrMsg "Unauthorized"
+// @Router /api/v1/scenario/scenario [post]
 func (r *Routes) CreateScenario() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req dtos.CreateScenarioRequest
@@ -198,6 +262,19 @@ func (r *Routes) CreateScenario() gin.HandlerFunc {
 	}
 }
 
+// UpdateScenario godoc
+// @Summary Update a scenario
+// @Description Update an existing scenario by ID.
+// @Tags Scenario
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Scenario ID"
+// @Param request body dtos.UpdateScenarioRequest true "Update details"
+// @Success 200 {object} dtos.Scenario "Updated scenario"
+// @Failure 400 {object} dtos.ErrMsg "Invalid request"
+// @Failure 404 {object} dtos.ErrMsg "Scenario not found"
+// @Router /api/v1/scenario/scenario/{id} [patch]
 func (r *Routes) UpdateScenario() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := uuid.Parse(ctx.Param("id"))
@@ -242,6 +319,15 @@ func (r *Routes) UpdateScenario() gin.HandlerFunc {
 	}
 }
 
+// DeleteScenario godoc
+// @Summary Delete a scenario
+// @Description Delete a scenario by ID.
+// @Tags Scenario
+// @Security BearerAuth
+// @Param id path string true "Scenario ID"
+// @Success 204 "No content"
+// @Failure 404 {object} dtos.ErrMsg "Scenario not found"
+// @Router /api/v1/scenario/scenario/{id} [delete]
 func (r *Routes) DeleteScenario() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := uuid.Parse(ctx.Param("id"))
@@ -277,6 +363,16 @@ func (r *Routes) DeleteScenario() gin.HandlerFunc {
 	}
 }
 
+// GetScenarioByID godoc
+// @Summary Get scenario by ID
+// @Description Retrieve a specific scenario by its ID.
+// @Tags Scenario
+// @Produce json
+// @Param id path string true "Scenario ID"
+// @Success 200 {object} dtos.Scenario "Scenario details"
+// @Failure 400 {object} dtos.ErrMsg "Invalid ID"
+// @Failure 404 {object} dtos.ErrMsg "Scenario not found"
+// @Router /api/v1/scenario/scenario/{id} [get]
 func (r *Routes) GetScenarioByID() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := uuid.Parse(ctx.Param("id"))
@@ -302,6 +398,17 @@ func (r *Routes) GetScenarioByID() gin.HandlerFunc {
 	}
 }
 
+// GetScenarios godoc
+// @Summary List scenarios
+// @Description Retrieve a list of scenarios with pagination.
+// @Tags Scenario
+// @Produce json
+// @Security BearerAuth
+// @Param before-id query string false "UUID of the last item from previous page"
+// @Param limit query int false "Number of items per page"
+// @Success 200 {array} dtos.Scenario "List of scenarios"
+// @Failure 400 {object} dtos.ErrMsg "Invalid parameters"
+// @Router /api/v1/scenario/scenarios [get]
 func (r *Routes) GetScenarios() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token, err := r.getToken(ctx)
@@ -357,6 +464,17 @@ func (r *Routes) GetScenarios() gin.HandlerFunc {
 	}
 }
 
+// GenerateScenario godoc
+// @Summary Generate AI scenario
+// @Description Trigger AI to generate a new scenario based on a prompt.
+// @Tags AI
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body dtos.GenerateScenarioRequest true "Generation prompt"
+// @Success 202 {object} map[string]string "Job accepted, returns scenario ID"
+// @Failure 400 {object} dtos.ErrMsg "Invalid request"
+// @Router /api/v1/ai/scenario [post]
 func (r *Routes) GenerateScenario() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req dtos.GenerateScenarioRequest
@@ -395,6 +513,15 @@ func (r *Routes) GenerateScenario() gin.HandlerFunc {
 	}
 }
 
+// GetScenes godoc
+// @Summary Get generated scenes
+// @Description Retrieve the list of generated scenes for a scenario.
+// @Tags AI
+// @Produce json
+// @Param id path string true "Scenario ID"
+// @Success 200 {array} dtos.Scene "List of scenes"
+// @Failure 400 {object} dtos.ErrMsg "Invalid ID"
+// @Router /api/v1/ai/scenario/{id}/scenes [get]
 func (r *Routes) GetScenes() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := uuid.Parse(ctx.Param("id"))
@@ -420,6 +547,15 @@ func (r *Routes) GetScenes() gin.HandlerFunc {
 	}
 }
 
+// GetScenario godoc
+// @Summary Get AI scenario status
+// @Description Retrieve the status and details of an AI-generated scenario.
+// @Tags AI
+// @Produce json
+// @Param id path string true "Scenario ID"
+// @Success 200 {object} dtos.Scenario "Scenario details"
+// @Failure 400 {object} dtos.ErrMsg "Invalid ID"
+// @Router /api/v1/ai/scenario/{id} [get]
 func (r *Routes) GetScenario() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := uuid.Parse(ctx.Param("id"))
@@ -445,6 +581,14 @@ func (r *Routes) GetScenario() gin.HandlerFunc {
 	}
 }
 
+// Connect godoc
+// @Summary Connect to scene stream
+// @Description Establish a WebSocket connection to stream scene generation progress.
+// @Tags AI
+// @Param id path string true "Scene ID"
+// @Success 101 "Switching Protocols"
+// @Failure 400 {object} dtos.ErrMsg "Invalid ID"
+// @Router /api/v1/ai/scenes/{id} [get]
 func (r *Routes) Connect() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := uuid.Parse(ctx.Param("id"))

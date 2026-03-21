@@ -1,0 +1,568 @@
+basePath: /api/v1
+definitions:
+  github_com_devathh_scene-ai_internal_common_dtos.CreateScenarioRequest:
+    properties:
+      global_style_prompt:
+        type: string
+      scenario_prompt:
+        type: string
+      scenes:
+        items:
+          $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.CreateSceneRequest'
+        type: array
+      title:
+        type: string
+    type: object
+  github_com_devathh_scene-ai_internal_common_dtos.CreateSceneRequest:
+    properties:
+      duration:
+        $ref: '#/definitions/time.Duration'
+      order:
+        type: integer
+      title:
+        type: string
+      video_prompt:
+        type: string
+    type: object
+  github_com_devathh_scene-ai_internal_common_dtos.ErrMsg:
+    properties:
+      error:
+        type: string
+    type: object
+  github_com_devathh_scene-ai_internal_common_dtos.GenerateScenarioRequest:
+    properties:
+      prompt:
+        type: string
+    type: object
+  github_com_devathh_scene-ai_internal_common_dtos.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  github_com_devathh_scene-ai_internal_common_dtos.RegisterRequest:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      password:
+        type: string
+    type: object
+  github_com_devathh_scene-ai_internal_common_dtos.Scenario:
+    properties:
+      author_id:
+        type: string
+      created_at:
+        type: integer
+      global_style_prompt:
+        type: string
+      id:
+        type: string
+      scenario_prompt:
+        type: string
+      scenes:
+        items:
+          $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.Scene'
+        type: array
+      status:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: integer
+    type: object
+  github_com_devathh_scene-ai_internal_common_dtos.Scene:
+    properties:
+      duration:
+        $ref: '#/definitions/time.Duration'
+      id:
+        type: string
+      order:
+        type: integer
+      title:
+        type: string
+      video_prompt:
+        type: string
+    type: object
+  github_com_devathh_scene-ai_internal_common_dtos.Token:
+    properties:
+      access:
+        type: string
+      access-ttl:
+        type: integer
+      refresh:
+        type: string
+      refresh-ttl:
+        type: integer
+    type: object
+  github_com_devathh_scene-ai_internal_common_dtos.UpdateScenarioRequest:
+    properties:
+      global_style_prompt:
+        type: string
+      scenario_prompt:
+        type: string
+      scenes:
+        items:
+          $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.UpdateSceneRequest'
+        type: array
+      title:
+        type: string
+    type: object
+  github_com_devathh_scene-ai_internal_common_dtos.UpdateSceneRequest:
+    properties:
+      duration:
+        $ref: '#/definitions/time.Duration'
+      id:
+        type: string
+      order:
+        type: integer
+      title:
+        type: string
+      video_prompt:
+        type: string
+    type: object
+  github_com_devathh_scene-ai_internal_common_dtos.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      password:
+        type: string
+    type: object
+  github_com_devathh_scene-ai_internal_common_dtos.User:
+    properties:
+      created_at:
+        type: integer
+      email:
+        type: string
+      firstname:
+        type: string
+      id:
+        type: string
+      lastname:
+        type: string
+      updated_at:
+        type: integer
+    type: object
+  time.Duration:
+    enum:
+    - -9223372036854775808
+    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
+    format: int64
+    type: integer
+    x-enum-varnames:
+    - minDuration
+    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+    - Minute
+    - Hour
+host: localhost:8080
+info:
+  contact:
+    email: support@scene-ai.com
+    name: API Support
+  description: API for generating scenarios and scenes using Artificial Intelligence.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Scene AI API
+  version: "1.0"
+paths:
+  /api/v1/ai/scenario:
+    post:
+      consumes:
+      - application/json
+      description: Trigger AI to generate a new scenario based on a prompt.
+      parameters:
+      - description: Generation prompt
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.GenerateScenarioRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Job accepted, returns scenario ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      security:
+      - BearerAuth: []
+      summary: Generate AI scenario
+      tags:
+      - AI
+  /api/v1/ai/scenario/{id}:
+    get:
+      description: Retrieve the status and details of an AI-generated scenario.
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Scenario details
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.Scenario'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      summary: Get AI scenario status
+      tags:
+      - AI
+  /api/v1/ai/scenario/{id}/scenes:
+    get:
+      description: Retrieve the list of generated scenes for a scenario.
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of scenes
+          schema:
+            items:
+              $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.Scene'
+            type: array
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      summary: Get generated scenes
+      tags:
+      - AI
+  /api/v1/ai/scenes/{id}:
+    get:
+      description: Establish a WebSocket connection to stream scene generation progress.
+      parameters:
+      - description: Scene ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      summary: Connect to scene stream
+      tags:
+      - AI
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return access token.
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.Token'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      summary: User login
+      tags:
+      - Auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account with email and password.
+      parameters:
+      - description: Registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.User'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+        "409":
+          description: User already exists
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      summary: Register a new user
+      tags:
+      - Auth
+  /api/v1/auth/user:
+    delete:
+      description: Permanently delete the current user's account.
+      responses:
+        "204":
+          description: No content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      security:
+      - BearerAuth: []
+      summary: Delete user account
+      tags:
+      - Auth
+    get:
+      description: Retrieve user profile by ID or current token.
+      parameters:
+      - description: User ID (optional, defaults to token owner)
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.User'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      security:
+      - BearerAuth: []
+      summary: Get user details
+      tags:
+      - Auth
+    patch:
+      consumes:
+      - application/json
+      description: Update current user's information.
+      parameters:
+      - description: Update details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated user
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.User'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - Auth
+  /api/v1/scenario/scenario:
+    post:
+      consumes:
+      - application/json
+      description: Create a manual scenario with scenes.
+      parameters:
+      - description: Scenario details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.CreateScenarioRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Scenario created
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.Scenario'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      security:
+      - BearerAuth: []
+      summary: Create a new scenario
+      tags:
+      - Scenario
+  /api/v1/scenario/scenario/{id}:
+    delete:
+      description: Delete a scenario by ID.
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No content
+        "404":
+          description: Scenario not found
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      security:
+      - BearerAuth: []
+      summary: Delete a scenario
+      tags:
+      - Scenario
+    get:
+      description: Retrieve a specific scenario by its ID.
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Scenario details
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.Scenario'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+        "404":
+          description: Scenario not found
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      summary: Get scenario by ID
+      tags:
+      - Scenario
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing scenario by ID.
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.UpdateScenarioRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated scenario
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.Scenario'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+        "404":
+          description: Scenario not found
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      security:
+      - BearerAuth: []
+      summary: Update a scenario
+      tags:
+      - Scenario
+  /api/v1/scenario/scenarios:
+    get:
+      description: Retrieve a list of scenarios with pagination.
+      parameters:
+      - description: UUID of the last item from previous page
+        in: query
+        name: before-id
+        type: string
+      - description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of scenarios
+          schema:
+            items:
+              $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.Scenario'
+            type: array
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/github_com_devathh_scene-ai_internal_common_dtos.ErrMsg'
+      security:
+      - BearerAuth: []
+      summary: List scenarios
+      tags:
+      - Scenario
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
