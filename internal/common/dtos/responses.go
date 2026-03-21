@@ -29,7 +29,7 @@ type Scenario struct {
 	ScenarioPrompt    string  `json:"scenario_prompt"`
 	GlobalStylePrompt string  `json:"global_style_prompt"`
 	Status            int     `json:"status"`
-	Scenes            []Scene `json:"scenes"`
+	Scenes            []Scene `json:"scenes,omitempty"`
 	CreatedAt         int64   `json:"created_at"`
 	UpdatedAt         int64   `json:"updated_at"`
 }
@@ -40,6 +40,10 @@ type Scene struct {
 	Title       string        `json:"title"`
 	Duration    time.Duration `json:"duration"`
 	VideoPrompt string        `json:"video_prompt"`
+}
+
+type Scenes struct {
+	Scenes []Scene `json:"scenes"`
 }
 
 type Scenarios struct {

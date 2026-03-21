@@ -49,3 +49,7 @@ type UpdateSceneRequest struct {
 	Duration    *time.Duration `json:"duration,omitempty"`
 	VideoPrompt *string        `json:"video_prompt,omitempty"`
 }
+
+type GenerateScenarioRequest struct {
+	Prompt string `json:"prompt"`
+}

@@ -7,16 +7,19 @@ import (
 	"strings"
 
 	"github.com/devathh/scene-ai/internal/common/dtos"
+	aiservices "github.com/devathh/scene-ai/internal/modules/ai/application/services"
 	authservices "github.com/devathh/scene-ai/internal/modules/auth/application/services"
 	scenarioservices "github.com/devathh/scene-ai/internal/modules/scenario/application/services"
 	"github.com/devathh/scene-ai/pkg/consts"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 )
 
 type Routes struct {
 	authService     authservices.AuthService
 	scenarioService scenarioservices.ScenarioService
+	aiService       aiservices.AIService
 }
 
 func (r *Routes) Register() gin.HandlerFunc {
@@ -351,6 +354,133 @@ func (r *Routes) GetScenarios() gin.HandlerFunc {
 		}
 
 		ctx.JSON(http.StatusOK, resp)
+	}
+}
+
+func (r *Routes) GenerateScenario() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var req dtos.GenerateScenarioRequest
+		if err := ctx.BindJSON(&req); err != nil {
+			ctx.JSON(http.StatusBadRequest, dtos.ErrMsg{
+				Error: "invalid request",
+			})
+			return
+		}
+
+		token, err := r.getToken(ctx)
+		if err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		id, err := r.aiService.GenerateScenario(ctx, &req, token)
+		if err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		ctx.JSON(http.StatusAccepted, gin.H{
+			"id": id.String(),
+		})
+	}
+}
+
+func (r *Routes) GetScenes() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id, err := uuid.Parse(ctx.Param("id"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, dtos.ErrMsg{
+				Error: "invalid id",
+			})
+			return
+		}
+
+		resp, err := r.aiService.GetScenes(ctx, id)
+		if err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		ctx.JSON(http.StatusOK, resp)
+	}
+}
+
+func (r *Routes) GetScenario() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id, err := uuid.Parse(ctx.Param("id"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, dtos.ErrMsg{
+				Error: "invalid id",
+			})
+			return
+		}
+
+		resp, err := r.aiService.GetScenario(ctx, id)
+		if err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
+
+		ctx.JSON(http.StatusOK, resp)
+	}
+}
+
+func (r *Routes) Connect() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id, err := uuid.Parse(ctx.Param("id"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, dtos.ErrMsg{
+				Error: "invalid id",
+			})
+			return
+		}
+
+		var upgrader = websocket.Upgrader{
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+		}
+
+		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, dtos.ErrMsg{
+				Error: "failed to connect",
+			})
+			return
+		}
+		defer conn.Close()
+
+		if err := r.aiService.Connect(ctx.Request.Context(), conn, id); err != nil {
+			ctx.JSON(
+				r.getCode(err),
+				dtos.ErrMsg{
+					Error: err.Error(),
+				},
+			)
+			return
+		}
 	}
 }
 

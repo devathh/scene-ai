@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 
 	"github.com/devathh/scene-ai/internal/common/config"
@@ -13,6 +14,9 @@ import (
 	jwtkeyloader "github.com/devathh/scene-ai/internal/infrastructure/jwt/keyloader"
 	jwtmanager "github.com/devathh/scene-ai/internal/infrastructure/jwt/manager"
 	"github.com/devathh/scene-ai/internal/infrastructure/persistence/postgres"
+	aiservices "github.com/devathh/scene-ai/internal/modules/ai/application/services"
+	scenarioredis "github.com/devathh/scene-ai/internal/modules/ai/infrastructure/cache/redis/scenario"
+	openrouterhttp "github.com/devathh/scene-ai/internal/modules/ai/infrastructure/http/openrouter"
 	authservices "github.com/devathh/scene-ai/internal/modules/auth/application/services"
 	sessionredis "github.com/devathh/scene-ai/internal/modules/auth/infrastructure/cache/redis/session"
 	authuserpg "github.com/devathh/scene-ai/internal/modules/auth/infrastructure/persistence/postgres/user"
@@ -114,14 +118,49 @@ func provideServer(
 		return nil, fmt.Errorf("failed to provide scenario service: %w", err)
 	}
 
+	aiService, err := provideAIService(
+		log,
+		cfg,
+		redisClient,
+		scenarioService,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to provide ai service: %w", err)
+	}
+
 	handler, err := handlers.New(cfg,
 		authService,
-		scenarioService)
+		scenarioService,
+		aiService)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create handler: %w", err)
 	}
 
 	return httpserver.New(cfg, handler), nil
+}
+
+func provideAIService(
+	log *slog.Logger,
+	cfg *config.Config,
+	redisClient *redissdk.Client,
+	scenarioService scenarioservices.ScenarioService,
+) (aiservices.AIService, error) {
+	jwtManager, err := jwtmanager.New(cfg, jwtkeyloader.New(
+		cfg.JWT.PublicKeyPath,
+		cfg.JWT.PrivateKeyPath,
+	))
+	if err != nil {
+		return nil, err
+	}
+
+	return aiservices.New(
+		cfg,
+		log,
+		scenarioredis.NewClient(cfg, redisClient),
+		openrouterhttp.New(cfg, http.DefaultClient, "stepfun/step-3.5-flash:free"),
+		jwtManager,
+		scenarioService,
+	), nil
 }
 
 func provideScenarioService(

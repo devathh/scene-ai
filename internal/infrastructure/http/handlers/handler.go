@@ -6,6 +6,7 @@ import (
 
 	"github.com/devathh/scene-ai/internal/common/config"
 	"github.com/devathh/scene-ai/internal/infrastructure/http/middlewares"
+	aiservices "github.com/devathh/scene-ai/internal/modules/ai/application/services"
 	authservices "github.com/devathh/scene-ai/internal/modules/auth/application/services"
 	scenarioservices "github.com/devathh/scene-ai/internal/modules/scenario/application/services"
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,7 @@ func New(
 	cfg *config.Config,
 	authService authservices.AuthService,
 	scenarioService scenarioservices.ScenarioService,
+	aiService aiservices.AIService,
 ) (http.Handler, error) {
 	var router *gin.Engine
 	switch cfg.App.Env {
@@ -34,6 +36,7 @@ func New(
 	routes := Routes{
 		authService:     authService,
 		scenarioService: scenarioService,
+		aiService:       aiService,
 	}
 
 	api := router.Group("/api")
@@ -58,6 +61,14 @@ func New(
 				scenario.GET("/scenario/:id", routes.GetScenarioByID())
 
 				scenario.GET("/scenarios", routes.GetScenarios())
+			}
+
+			ai := v1.Group("/ai")
+			{
+				ai.POST("/scenario", routes.GenerateScenario())
+				ai.GET("/scenario/:id", routes.GetScenario())
+				ai.GET("/scenario/:id/scenes", routes.GetScenes())
+				ai.GET("/scenes/:id", routes.Connect())
 			}
 		}
 	}

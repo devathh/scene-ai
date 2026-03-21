@@ -9,8 +9,8 @@ server:
     enable: false
     server-cert-path: ./certs/server.crt
     server-key-path: ./certs/server.key
-  read-timeout: 2s
-  write-timeout: 2s
+  read-timeout: 20s
+  write-timeout: 20s
   idle-timeout: 30s
 
 persistence:
@@ -30,6 +30,7 @@ persistence:
 
 cache:
   user-ttl: 15m
+  scenario-generation-ttl: 30m
   redis:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
@@ -43,3 +44,8 @@ jwt:
   refresh-ttl: 168h
   private-key-path: ./jwtRS256.key
   public-key-path: ./jwtRS256.key.pub
+
+openrouter:
+  api-key: ${OR_APIKEY}
+  scenario-prompt-path: ./SCENARIO_PROMPT.md
+  scene-prompt-path: ./SCENE_PROMPT.md
