@@ -4,7 +4,7 @@ app:
   env: ${APP_ENV}
 
 server:
-  addr: localhost:8090
+  addr: :8090
   tls:
     enable: false
     server-cert-path: ./certs/server.crt
@@ -47,5 +47,5 @@ jwt:
 
 openrouter:
   api-key: ${OR_APIKEY}
-  scenario-prompt-path: ./SCENARIO_PROMPT.md
-  scene-prompt-path: ./SCENE_PROMPT.md
+  scenario-prompt-path: ./prompts/SCENARIO_PROMPT.md
+  scene-prompt-path: ./prompts/SCENE_PROMPT.md

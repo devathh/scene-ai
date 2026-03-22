@@ -45,7 +45,7 @@ func (a *App) Shutdown(ctx context.Context) error {
 
 func New() (*App, func(), error) {
 	if err := godotenv.Load(".env"); err != nil {
-		return nil, nil, fmt.Errorf("failed to load .env: %w", err)
+		slog.Warn(".env file doesn't exist")
 	}
 
 	cfg, err := provideConfig()
