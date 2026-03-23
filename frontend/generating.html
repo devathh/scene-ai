@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generating - Scene AI</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        /* Specific styles for generating page */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-text {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .scenes-stream {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            display: none; /* Hidden until first scene arrives */
+        }
+
+        .scene-item.new {
+            background-color: #f0f0f0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { background-color: #f0f0f0; }
+            50% { background-color: #ffffff; }
+            100% { background-color: #f0f0f0; }
+        }
+
+        .back-btn {
+            margin-top: 2rem;
+            padding: 0.8rem 2rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+        .back-btn:hover {
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Scene AI</div>
+        <div class="auth-buttons hidden" id="userProfile">
+            <button onclick="window.location.href='/'" class="back-btn" style="margin-top:0; padding: 0.5rem 1rem;">Create New</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="loader-container" id="loaderSection">
+            <div class="spinner"></div>
+            <h1>Creating Your Story</h1>
+            <p class="status-text" id="statusText">Connecting to AI engine...</p>
+        </div>
+
+        <div class="scenes-stream" id="streamSection">
+            <h2 style="margin-bottom: 1.5rem; font-size: 1.5rem; text-align:center;">Live Generation</h2>
+            <div id="scenesList"></div>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="/" class="back-btn">Back to Home</a>
+        </div>
+    </main>
+
+    <!-- Load ONLY generating.js to avoid conflicts with app.js -->
+    <script src="assets/generating.js"></script>
+</body>
+</html>

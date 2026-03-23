@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Scenarios - Scene AI</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+
+        .profile-title h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-title p {
+            color: var(--text-secondary);
+        }
+
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1000px;
+            padding: 1rem;
+        }
+
+        .scenario-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 200px;
+        }
+
+        .scenario-card:hover {
+            box-shadow: var(--card-shadow);
+            transform: translateY(-4px);
+            border-color: var(--accent-color);
+        }
+
+        .scenario-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .scenario-card .prompt-preview {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+
+        .scenario-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #999;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+            margin-top: auto;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .status-generating { background: #fff3cd; color: #856404; }
+        .status-generated { background: #d4edda; color: #155724; }
+        .status-modified { background: #cce5ff; color: #004085; }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state button {
+            margin-top: 1rem;
+            padding: 0.8rem 2rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo" style="cursor:pointer;" onclick="window.location.href='/'">Scene AI</div>
+        <div class="auth-buttons hidden" id="userProfile">
+            <span id="userName" style="margin-right: 1rem; font-weight: 500;"></span>
+            <button onclick="logout()">Log Out</button>
+        </div>
+        <div class="auth-buttons" id="authButtons">
+            <button onclick="window.location.href='/'">Home</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="profile-header">
+            <div class="profile-title">
+                <h1>My Scenarios</h1>
+                <p>Your generated stories and scenes</p>
+            </div>
+            <button onclick="window.location.href='/'" style="padding: 0.6rem 1.2rem; background: var(--accent-color); color: white; border: none; border-radius: 6px; cursor: pointer;">+ New Scenario</button>
+        </div>
+
+        <div id="scenariosContainer" class="scenarios-grid">
+            <!-- Scenarios will be injected here -->
+            <div class="empty-state">Loading your scenarios...</div>
+        </div>
+    </main>
+
+    <script src="assets/profile.js"></script>
+</body>
+</html>

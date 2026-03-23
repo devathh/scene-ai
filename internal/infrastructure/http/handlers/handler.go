@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"path/filepath"
 
 	"github.com/devathh/scene-ai/internal/common/config"
 	"github.com/devathh/scene-ai/internal/infrastructure/http/middlewares"
@@ -36,6 +37,39 @@ func New(
 	router.Use(middlewares.BaseMiddleware)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	frontendPath := "./frontend"
+	router.Static("/assets", filepath.Join(frontendPath, "assets"))
+	
+	router.GET("/generating.html", func(c *gin.Context) {
+		c.File(filepath.Join(frontendPath, "generating.html"))
+	})
+	router.GET("/profile.html", func(c *gin.Context) {
+		c.File(filepath.Join(frontendPath, "profile.html"))
+	})
+
+	router.NoRoute(func(c *gin.Context) {
+		path := c.Request.URL.Path
+
+		if len(path) >= 4 && path[:4] == "/api" {
+			c.JSON(404, gin.H{"error": "not found"})
+			return
+		}
+		if len(path) >= 8 && path[:8] == "/swagger" {
+			c.JSON(404, gin.H{"error": "not found"})
+			return
+		}
+		if path == "/generating.html" || path == "/profile.html" {
+			c.File(filepath.Join(frontendPath, path[1:]))
+			return
+		}
+
+		c.File(filepath.Join(frontendPath, "index.html"))
+	})
+
+	router.GET("/", func(c *gin.Context) {
+		c.File(filepath.Join(frontendPath, "index.html"))
+	})
 
 	routes := Routes{
 		authService:     authService,

@@ -221,6 +221,20 @@ func (as *aiService) handleNewScenario(ctx context.Context, rawScenario *scenari
 		)
 	}
 
+	f := scenario.FromScene(
+		uuid.New(),
+		-1,
+		"finished",
+		0,
+		"",
+	)
+	as.scenarioRepo.PublishScene(context.Background(), &f, rawScenario.ID())
+	if err := as.scenarioRepo.AddScene(ctx, &f, rawScenario.ID()); err != nil {
+		as.log.Error("failed to add scene",
+			slog.String("error", err.Error()),
+			slog.String("scenario_id", rawScenario.ID().String()))
+	}
+
 	as.log.Info("generated")
 }
 

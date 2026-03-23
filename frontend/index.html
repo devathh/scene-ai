@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scene AI - Minimalist Story Generator</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo" style="cursor:pointer;" onclick="window.location.href='/'">Scene AI</div>
+        <div class="auth-buttons" id="authButtons">
+            <button onclick="openModal('login')">Log In</button>
+            <button class="primary" onclick="openModal('register')">Sign Up</button>
+        </div>
+        <div class="auth-buttons hidden" id="userProfile">
+            <span id="userName" style="margin-right: 1rem; font-weight: 500;"></span>
+            <button onclick="window.location.href='/profile.html'" style="margin-right: 0.5rem;">My Scenarios</button>
+            <button onclick="logout()">Log Out</button>
+        </div>
+    </header>
+
+    <main>
+        <h1>Create Cinematic Scenes</h1>
+        <p class="subtitle">Describe your vision, and let our AI craft the perfect storyboard.</p>
+
+        <div class="generator-card">
+            <div class="form-group">
+                <label for="prompt">Scenario Prompt</label>
+                <textarea id="prompt" rows="5" placeholder="E.g., A cyberpunk detective walking through a rainy neon-lit alleyway in Tokyo, 2077..."></textarea>
+            </div>
+
+            <button class="generate-btn" id="generateBtn" onclick="generateScenario()">Generate Scenario</button>
+            <div id="errorMsg" class="error-msg"></div>
+        </div>
+    </main>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Log In</h2>
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group" id="nameFields" style="display:none;">
+                    <div style="display:flex; gap:10px;">
+                        <div style="flex:1;">
+                            <label>First Name</label>
+                            <input type="text" id="firstname">
+                        </div>
+                        <div style="flex:1;">
+                            <label>Last Name</label>
+                            <input type="text" id="lastname">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="generate-btn">Submit</button>
+                <div id="authErrorMsg" class="error-msg"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/app.js"></script>
+    <script>
+        // Inline logic to toggle name fields in modal based on mode
+        const originalOpenModal = window.openModal;
+        window.openModal = function(mode) {
+            if (originalOpenModal) originalOpenModal(mode);
+            const nameFields = document.getElementById('nameFields');
+            const firstname = document.getElementById('firstname');
+            const lastname = document.getElementById('lastname');
+            
+            if (mode === 'register') {
+                if (nameFields) nameFields.style.display = 'block';
+                if (firstname) firstname.required = true;
+                if (lastname) lastname.required = true;
+            } else {
+                if (nameFields) nameFields.style.display = 'none';
+                if (firstname) firstname.required = false;
+                if (lastname) lastname.required = false;
+            }
+        }
+    </script>
+</body>
+</html>
