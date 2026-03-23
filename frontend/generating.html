@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generating - Scene AI</title>
     <link rel="stylesheet" href="assets/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <style>
-        /* Specific styles for generating page */
         .loader-container {
             display: flex;
             flex-direction: column;
@@ -41,7 +41,7 @@
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
-            display: none; /* Hidden until first scene arrives */
+            display: none;
         }
 
         .scene-item.new {
@@ -62,7 +62,7 @@
             border: 1px solid var(--border-color);
             color: var(--text-primary);
             border-radius: 6px;
-            cursor: pointer;
+            cursor: none;
             text-decoration: none;
             font-weight: 500;
             transition: all 0.2s;
@@ -98,7 +98,9 @@
         </div>
     </main>
 
-    <!-- Load ONLY generating.js to avoid conflicts with app.js -->
+    <script src="assets/particles.js"></script>
+    <script src="assets/cursor.js"></script>
+    <script src="assets/magic.js"></script>
     <script src="assets/generating.js"></script>
 </body>
 </html>

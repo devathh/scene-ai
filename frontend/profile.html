@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Scenarios - Scene AI</title>
     <link rel="stylesheet" href="assets/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <style>
         .profile-header {
             display: flex;
@@ -40,7 +41,7 @@
             border-radius: 12px;
             padding: 1.5rem;
             transition: all 0.2s ease;
-            cursor: pointer;
+            cursor: none;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -107,7 +108,7 @@
             color: white;
             border: none;
             border-radius: 6px;
-            cursor: pointer;
+            cursor: none;
             font-weight: 600;
         }
     </style>
@@ -130,15 +131,17 @@
                 <h1>My Scenarios</h1>
                 <p>Your generated stories and scenes</p>
             </div>
-            <button onclick="window.location.href='/'" style="padding: 0.6rem 1.2rem; background: var(--accent-color); color: white; border: none; border-radius: 6px; cursor: pointer;">+ New Scenario</button>
+            <button onclick="window.location.href='/'" style="padding: 0.6rem 1.2rem; background: var(--accent-color); color: white; border: none; border-radius: 6px; cursor: none;">+ New Scenario</button>
         </div>
 
         <div id="scenariosContainer" class="scenarios-grid">
-            <!-- Scenarios will be injected here -->
             <div class="empty-state">Loading your scenarios...</div>
         </div>
     </main>
 
+    <script src="assets/particles.js"></script>
+    <script src="assets/cursor.js"></script>
+    <script src="assets/magic.js"></script>
     <script src="assets/profile.js"></script>
 </body>
 </html>

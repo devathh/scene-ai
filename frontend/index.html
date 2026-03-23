@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scene AI - Minimalist Story Generator</title>
     <link rel="stylesheet" href="assets/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 </head>
 <body>
 
@@ -68,9 +69,11 @@
         </div>
     </div>
 
+    <script src="assets/particles.js"></script>
+    <script src="assets/cursor.js"></script>
+    <script src="assets/magic.js"></script>
     <script src="assets/app.js"></script>
     <script>
-        // Inline logic to toggle name fields in modal based on mode
         const originalOpenModal = window.openModal;
         window.openModal = function(mode) {
             if (originalOpenModal) originalOpenModal(mode);

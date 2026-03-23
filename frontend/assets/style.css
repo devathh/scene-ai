@@ -23,32 +23,113 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
-/* Header */
+@media (pointer: fine) {
+    * {
+        cursor: none;
+    }
+    a, button, .scenario-card, input, textarea, select, [onclick] {
+        cursor: none;
+    }
+}
+
+.custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: difference;
+    display: none;
+}
+
+.custom-cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 4px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+    display: none;
+}
+
+.custom-cursor-follower {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: width 0.2s, height 0.2s, background-color 0.2s;
+    display: none;
+}
+
+@media (pointer: fine) {
+    .custom-cursor,
+    .custom-cursor-dot,
+    .custom-cursor-follower {
+        display: block;
+    }
+}
+
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 2rem 5%;
+    padding: 1.5rem 5%;
     border-bottom: 1px solid var(--border-color);
+    position: relative;
+    z-index: 10;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .logo {
     font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: -0.05em;
+    flex-shrink: 0;
+}
+
+.auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .auth-buttons button {
     background: none;
     border: 1px solid var(--border-color);
-    padding: 0.5rem 1.2rem;
+    padding: 0.5rem 1rem;
     border-radius: 6px;
-    cursor: pointer;
     font-size: 0.9rem;
     transition: all 0.2s ease;
-    margin-left: 0.5rem;
+    white-space: nowrap;
+}
+
+@media (pointer: fine) {
+    .auth-buttons button {
+        cursor: none;
+    }
 }
 
 .auth-buttons button.primary {
@@ -61,7 +142,6 @@ header {
     opacity: 0.8;
 }
 
-/* Main Content */
 main {
     flex: 1;
     display: flex;
@@ -71,10 +151,12 @@ main {
     max-width: 800px;
     margin: 0 auto;
     width: 100%;
+    position: relative;
+    z-index: 10;
 }
 
 h1 {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 800;
     text-align: center;
     margin-bottom: 1rem;
@@ -88,7 +170,6 @@ p.subtitle {
     font-size: 1.1rem;
 }
 
-/* Generator Form */
 .generator-card {
     width: 100%;
     background: white;
@@ -96,6 +177,8 @@ p.subtitle {
     border-radius: 12px;
     box-shadow: var(--card-shadow);
     border: 1px solid var(--border-color);
+    position: relative;
+    z-index: 10;
 }
 
 .form-group {
@@ -137,7 +220,6 @@ textarea:focus, input:focus {
     border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
-    cursor: pointer;
     transition: transform 0.1s ease;
 }
 
@@ -147,10 +229,8 @@ textarea:focus, input:focus {
 
 .generate-btn:disabled {
     background-color: #ccc;
-    cursor: not-allowed;
 }
 
-/* Results Area */
 #results {
     margin-top: 3rem;
     width: 100%;
@@ -177,7 +257,6 @@ textarea:focus, input:focus {
     font-size: 0.95rem;
 }
 
-/* Auth Modal */
 .modal {
     display: none;
     position: fixed;
@@ -190,6 +269,7 @@ textarea:focus, input:focus {
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    padding: 1rem;
 }
 
 .modal-content {
@@ -200,6 +280,10 @@ textarea:focus, input:focus {
     width: 100%;
     max-width: 400px;
     border: 1px solid var(--border-color);
+    position: relative;
+    z-index: 1001;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .modal h2 {
@@ -209,7 +293,6 @@ textarea:focus, input:focus {
 
 .close-modal {
     float: right;
-    cursor: pointer;
     font-size: 1.5rem;
     line-height: 1rem;
 }
@@ -219,6 +302,47 @@ textarea:focus, input:focus {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Utility */
 .hidden { display: none; }
 .error-msg { color: #d32f2f; font-size: 0.85rem; margin-top: 0.5rem; }
+
+.magic-sparkle {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9997;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: multiply;
+}
+
+@media (max-width: 768px) {
+    header {
+        padding: 1rem 5%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .logo {
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-buttons {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .auth-buttons button {
+        flex: 1;
+        max-width: 150px;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .generator-card {
+        padding: 1.5rem;
+    }
+}
